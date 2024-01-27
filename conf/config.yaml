@@ -1,0 +1,45 @@
+# 公共配置
+# 原视频根目录
+resourceDir: /Users/xxx/Downloads/xxx
+# 剪辑后视频根目录
+outputDir: /Users/xxx/Downloads/xxx
+#小说来源
+novelSource: fanQie
+
+# 小说配置信息
+#番茄小说配置
+fanQie:
+  token: 0ea7a08b4b205bb2a0ca9bf0acf44610
+  app_id: 457699
+  msToken: 8uXDyGW_xJYzJYLvt6jOkxbR3FfmWRU2o2sv22rr94YNytFNWSN89-XN16y5RwpkSLVbi1VQDDm1xGuIQaK1wyjYxpw08WkdpjZfYmCYgPFQgGKCQneSjVWLC44DLQ==
+  X-Bogus: DFSzswVY/mbANVoktEUUMmxy0H9X
+  #付费短故事 · 爆款榜
+  bookListUrl: https://promoter.fanqieopen.com/api/platform/ranking/rank_list/v:version?rank_id=1&token={token}&sort_key=6&sort_type=2&content_tab=1&page_index={page_index}&page_size={page_size}&app_id={appid}&msToken={msToken}&X-Bogus={X-Bogus}
+  bookInfoUrl: https://promoter.fanqieopen.com/api/platform/content/book/list/v:version?book_id={bookid}&content_tab=1&genre=8&token={token}&app_id={appid}&msToken={msToken}&X-Bogus={X-Bogus}
+  chapterInfoUrl: https://promoter.fanqieopen.com/api/platform/content/chapter/list/v:version?book_id={bookid}&page_index=0&page_size=500&content_tab=1&token={token}&app_id={appid}&msToken={msToken}&X-Bogus={X-Bogus}
+  chapterContentUrl: https://promoter.fanqieopen.com/api/platform/content/chapter/detail/v:version?book_id={bookid}&item_id={itemid}&token={token}&content_tab=1&app_id={appid}&msToken={msToken}&X-Bogus={X-Bogus}
+  header:
+    "Accept": "application/json, text/plain, */*"
+    "Referer": "https://promoter.fanqieopen.com/page/share/rank?token={token}&tab_type=1&key=1"
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    "Cookie": "s_v_web_id=verify_lrstlx70_Q4gOD0jR_48A7_4sWX_87YP_Zu7PEA0aRUyG; ttcid=11ed2b5df619455095bcf131316580eb20; x-jupiter-uuid=1706163837292585; tt_scid=214zHnieMUuh4r34U5lJD2eznbrk09MmQHRrav2lwd8p3-I7o5toeoC49AVBTndFc4a8; msToken=8uXDyGW_xJYzJYLvt6jOkxbR3FfmWRU2o2sv22rr94YNytFNWSN89-XN16y5RwpkSLVbi1VQDDm1xGuIQaK1wyjYxpw08WkdpjZfYmCYgPFQgGKCQneSjVWLC44DLQ=="
+#    "Cookie": "s_v_web_id=verify_lrstlx70_Q4gOD0jR_48A7_4sWX_87YP_Zu7PEA0aRUyG; ttcid=11ed2b5df619455095bcf131316580eb20; x-jupiter-uuid=1706163837292585; tt_scid=lsQVMoixmFaemTM5vuOyFGgUlgkuNAw0EMWF4KgrFd4eA1rqkZZ94aGQKh1febPd14d3; msToken=FYqxpB9UUBiDsZkORUb-4iytD-w214OiwZc0Sf8v5DsmLWVLYKchCVU61MyHIUM5sVDWdM4lZfEuLYSczciDv3n7wTK8lQi_wWpHyQVV6jxI1Nfp1M2TZP1NNtWMww=="
+#           "Cookie":"s_v_web_id=verify_lrstlx70_Q4gOD0jR_48A7_4sWX_87YP_Zu7PEA0aRUyG; ttcid=11ed2b5df619455095bcf131316580eb20; x-jupiter-uuid=1706163837292585; msToken={msToken}; tt_scid=lsQVMoixmFaemTM5vuOyFGgUlgkuNAw0EMWF4KgrFd4eA1rqkZZ94aGQKh1febPd14d3"}
+  cbidList:
+    - 7326809253237228094
+
+
+#音频转换配置
+audio:
+  aesKey: abcdefgabcdefg12
+  convertUrl: https://www.douge.club/peiyin/user/webNewSynGenerateVoiceNew
+  getVoiceAudioUrlWeb: https://www.douge.club/peiyin/user/getVoiceAudioUrlWeb
+  voiceId: 64
+  sign: 31b98eb872bd3156fc8114176dfb8ff571c81bf6c3c929b30041a4a459ae75bf5cccd8d04f16da7586d7203b2179859e86772b44bffa9e76bdb25b938485156d
+  header:
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    "X-Access-Token": "9111111113018116"
+    "Content-Type": "application/json;charset=UTF-8"
+    "Cookie": "shareToken=9111111113018116"
+    "Accept": "application/json, text/plain, */*"
+    "Referer": "https://www.douge.club/"
