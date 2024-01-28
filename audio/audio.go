@@ -49,7 +49,7 @@ func TxtToAudio(ctx context.Context, content, audioFileName string) error {
 	}
 	taskBody, err := sonic.Marshal(&taskParams)
 	if err != nil {
-		log.SugarLogger.Errorf("[TxtToAudio]Marshal_error err:%v", err)
+		log.Errorf("[TxtToAudio]Marshal_error err:%v", err)
 		return err
 	}
 	client := &http.Client{}
@@ -57,31 +57,33 @@ func TxtToAudio(ctx context.Context, content, audioFileName string) error {
 	setAudioHeader(ctx, taskReq, false)
 	taskRsp, taskRspErr := client.Do(taskReq)
 	if taskRspErr != nil {
-		log.SugarLogger.Errorf("[TxtToAudio]TaskRequest_error taskRspErr:%v", taskRspErr)
+		log.Errorf("[TxtToAudio]TaskRequest_error taskRspErr:%v", taskRspErr)
 		return taskRspErr
 	}
 	defer taskRsp.Body.Close()
 	if taskRsp.StatusCode != http.StatusOK {
-		log.SugarLogger.Errorf("[TxtToAudio]TaskRsp_error rsp.StatusCode:%d", taskRsp.StatusCode)
+		log.Errorf("[TxtToAudio]TaskRsp_error rsp.StatusCode:%d", taskRsp.StatusCode)
 		return fmt.Errorf("TaskRsp_error rsp.StatusCode:%d", taskRsp.StatusCode)
 	}
 	var audioTaskRsp audioRsp
 	taskRspBody, _ := io.ReadAll(taskRsp.Body)
 
-	log.SugarLogger.Infof("[TxtToAudio] taskRspBody:%s", string(taskRspBody))
+	log.Infof("[TxtToAudio] taskRspBody:%s", string(taskRspBody))
 
 	err = sonic.Unmarshal(taskRspBody, &audioTaskRsp)
 	if err != nil {
-		log.SugarLogger.Errorf("[TxtToAudio]Unmarshal_error err:%v", err)
+		log.Errorf("[TxtToAudio]Unmarshal_error err:%v", err)
 		return err
+	}
+	if audioTaskRsp.Code != 0 {
+		log.Errorf("[TxtToAudio]audioTaskRsp.Code_error :%d", audioTaskRsp.Code)
+		return fmt.Errorf("audioTaskRsp_error :%s", string(taskRspBody))
 	}
 
 	// ==================获取音频地址==================
-
 	taskId := audioTaskRsp.Data
-	// taskId := "051f3a10-dbfc-42f2-8781-6adf77bc3f20"
 	fmt.Printf("taskId:%s\n", taskId)
-
+	time.Sleep(time.Second * 3) // 拿到ID后先停3秒后再请求
 	urlParams := struct {
 		TaskId string `json:"taskId"`
 	}{TaskId: taskId}
@@ -94,25 +96,29 @@ func TxtToAudio(ctx context.Context, content, audioFileName string) error {
 
 		urlRsp, urlRspErr := client.Do(urlReq)
 		if urlRspErr != nil {
-			log.SugarLogger.Errorf("[TxtToAudio]UrlRequest_error urlRspErr:%v", urlRspErr)
+			log.Errorf("[TxtToAudio]UrlRequest_error urlRspErr:%v", urlRspErr)
 			return urlRspErr
 		}
 		defer urlRsp.Body.Close()
 		if urlRsp.StatusCode != http.StatusOK {
-			log.SugarLogger.Errorf("[TxtToAudio]UrlRsp_status_error rsp.StatusCode:%d", urlRsp.StatusCode)
+			log.Errorf("[TxtToAudio]UrlRsp_status_error rsp.StatusCode:%d", urlRsp.StatusCode)
 			return fmt.Errorf("UrlRsp_status_error rsp.StatusCode:%d", urlRsp.StatusCode)
 		}
 		urlRspBody, _ := io.ReadAll(urlRsp.Body)
 
-		log.SugarLogger.Infof("[TxtToAudio]urlRspBody:%s", string(urlRspBody))
+		log.Infof("[TxtToAudio]urlRspBody:%s", string(urlRspBody))
 
 		err = sonic.Unmarshal(urlRspBody, &audioUrlRsp)
 		if err != nil {
-			log.SugarLogger.Errorf("[TxtToAudio]Unmarshal_error err:%v", err)
+			log.Errorf("[TxtToAudio]Unmarshal_error err:%v", err)
 			return err
 		}
+		if audioUrlRsp.Code != 0 {
+			log.Errorf("[TxtToAudio]audioUrlRsp.Code_error :%d", audioUrlRsp.Code)
+			break
+		}
 		if audioUrlRsp.Msg == "配音生成中" || audioUrlRsp.Msg != "success" {
-			time.Sleep(time.Second * 10) // 停10秒后重试
+			time.Sleep(time.Second * 3) // 停3秒后重试
 			continue
 		}
 		if audioUrlRsp.Msg == "success" {
@@ -121,26 +127,26 @@ func TxtToAudio(ctx context.Context, content, audioFileName string) error {
 	}
 	// ==================下载音频==================
 	urlCrypt := audioUrlRsp.Data
-	videoUrl, err := aesDecrypt(urlCrypt, conf.C.Audio.AesKey)
+	audioUrl, err := aesDecrypt(urlCrypt, conf.C.Audio.AesKey)
 	if err != nil {
-		log.SugarLogger.Errorf("[TxtToAudio]aesDecrypt_error err:%v", err)
+		log.Errorf("[TxtToAudio]aesDecrypt_error err:%v", err)
 		return err
 	}
 
-	log.SugarLogger.Infof("videoUrl:%s", videoUrl)
+	log.Infof("[TxtToAudio]audioUrl:%s", audioUrl)
 
-	dwReq, _ := http.NewRequest("GET", videoUrl, nil)
+	dwReq, _ := http.NewRequest("GET", audioUrl, nil)
 	setAudioHeader(ctx, dwReq, true)
 	dwRsp, dwRspErr := client.Do(dwReq)
 	if dwRspErr != nil {
-		log.SugarLogger.Errorf("[TxtToAudio]DwRequest_error dwRspErr:%v", dwRspErr)
+		log.Errorf("[TxtToAudio]DwRequest_error dwRspErr:%v", dwRspErr)
 		return dwRspErr
 	}
 	defer dwRsp.Body.Close()
 	// 创建一个文件用于保存
-	out, err := os.Create(audioFileName)
+	out, err := os.Create(audioFileName + ".wav")
 	if err != nil {
-		log.SugarLogger.Errorf("[TxtToAudio]CreateAudioFile_error err:%v", err)
+		log.Errorf("[TxtToAudio]CreateAudioFile_error err:%v", err)
 		return err
 	}
 	defer out.Close()
@@ -148,7 +154,7 @@ func TxtToAudio(ctx context.Context, content, audioFileName string) error {
 	// 然后将响应流和文件流对接起来
 	_, err = io.Copy(out, dwRsp.Body)
 	if err != nil {
-		log.SugarLogger.Errorf("[TxtToAudio]Copy_error err:%v", err)
+		log.Errorf("[TxtToAudio]Copy_error err:%v", err)
 		return err
 	}
 	return nil

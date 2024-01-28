@@ -6,6 +6,7 @@ package audio
 
 import (
 	"context"
+	"reflect"
 	"testing"
 
 	"douyin_video/conf"
@@ -40,6 +41,41 @@ func TestTxtToAudio(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := TxtToAudio(tt.args.ctx, tt.args.content, tt.args.audioFileName); (err != nil) != tt.wantErr {
 				t.Errorf("TxtToAudio() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestAesDecrypt(t *testing.T) {
+	type args struct {
+		crypted string
+		key     string
+		iv      string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    []byte
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+		{
+			name: "",
+			args: args{
+				crypted: "g2Ts2f59KhPf6TpuqI6SbuH7qJAmbj0PfmspkrDvCc2msI9aKnALGiUhCyTIL9Yd7xW5UPWW1hH6hgRDfXdTO3Pag3FiGofVVDBhCQbdgnuXMAXal1rQ++8GWB0Uhrj86aZjR1iWyP7ODGXe6JbUyQ==",
+				key:     "abcdefgabcdefg12",
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := aesDecrypt(tt.args.crypted, tt.args.key)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("AesDecrypt() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("AesDecrypt() got = %v, want %v", got, tt.want)
 			}
 		})
 	}

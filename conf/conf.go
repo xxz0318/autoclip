@@ -7,6 +7,7 @@ package conf
 import (
 	_ "embed"
 	"log"
+	"os"
 
 	"gopkg.in/yaml.v3"
 )
@@ -14,18 +15,20 @@ import (
 var C config
 
 const (
-	DebugFile = "./logs/debug.log"
-	InfoFile  = "./logs/info.log"
-	ErrorFile = "./logs/error.log"
-	WarnFile  = "./logs/warn.log"
+	DebugFile = "debug.log"
+	InfoFile  = "info.log"
+	ErrorFile = "error.log"
+	WarnFile  = "warn.log"
 )
 
 type config struct {
-	ResourceDir string `yaml:"resourceDir"`
-	OutputDir   string `yaml:"outputDir"`
-	NovelSource string `yaml:"novelSource"`
-	FanQie      fanQie `yaml:"fanQie"`
-	Audio       audio  `yaml:"audio"`
+	VideoResourceDir string `yaml:"videoResourceDir"`
+	VideoOutputDir   string `yaml:"videoOutputDir"`
+	AudioOutputDir   string `yaml:"audioOutputDir"`
+	LogDir           string `yaml:"logDir"`
+	NovelSource      string `yaml:"novelSource"`
+	FanQie           fanQie `yaml:"fanQie"`
+	Audio            audio  `yaml:"audio"`
 }
 type fanQie struct {
 	Token             string            `yaml:"token"`
@@ -49,15 +52,13 @@ type audio struct {
 	Header              map[string]string `yaml:"header"`
 }
 
-var (
-	//go:embed config.yaml
-	configFile string
-)
-
 func LoadConfig() {
-
+	buf, err := os.ReadFile("../conf/config.yaml")
+	if err != nil {
+		log.Panicln("load config conf failed: ", err)
+	}
 	var conf config
-	err := yaml.Unmarshal([]byte(configFile), &conf)
+	err = yaml.Unmarshal(buf, &conf)
 	if err != nil {
 		log.Fatal(err)
 	}

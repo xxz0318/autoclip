@@ -125,7 +125,7 @@ func (f DianZhong) GetBookList(ctx context.Context, pageIndex, pageSize int32) (
 	rsp, reqErr := client.Do(req)
 
 	if reqErr != nil {
-		log.SugarLogger.Errorf("[GetBookList]NewRequest_error reqErr:%v", reqErr)
+		log.Errorf("[GetBookList]NewRequest_error reqErr:%v", reqErr)
 		return nil, 0, reqErr
 	}
 	defer rsp.Body.Close()
@@ -133,7 +133,7 @@ func (f DianZhong) GetBookList(ctx context.Context, pageIndex, pageSize int32) (
 	content, _ := io.ReadAll(rsp.Body)
 	err := sonic.Unmarshal(content, &bookInfoListRsp)
 	if err != nil {
-		log.SugarLogger.Errorf("[GetBookList]Unmarshal_error err:%v", err)
+		log.Errorf("[GetBookList]Unmarshal_error err:%v", err)
 		return nil, 0, err
 	}
 	return bookInfoListRsp.Data.RankBooks, bookInfoListRsp.Data.Total, nil
@@ -155,7 +155,7 @@ func (f DianZhong) GetBookInfo(ctx context.Context, bookId int64) (book, error) 
 	rsp, reqErr := client.Do(req)
 
 	if reqErr != nil {
-		log.SugarLogger.Errorf("[GetBookInfo]NewRequest_error reqErr:%v", reqErr)
+		log.Errorf("[GetBookInfo]NewRequest_error reqErr:%v", reqErr)
 		return bookInfo, reqErr
 	}
 	defer rsp.Body.Close()
@@ -163,7 +163,7 @@ func (f DianZhong) GetBookInfo(ctx context.Context, bookId int64) (book, error) 
 	content, _ := io.ReadAll(rsp.Body)
 	err := sonic.Unmarshal(content, &bookInfoRsp)
 	if err != nil {
-		log.SugarLogger.Errorf("[GetBookList]Unmarshal_error err:%v", err)
+		log.Errorf("[GetBookList]Unmarshal_error err:%v", err)
 		return bookInfo, err
 	}
 	if len(bookInfoRsp.Data.BookList) <= 0 {
@@ -188,7 +188,7 @@ func (f DianZhong) GetChapterInfo(ctx context.Context, bookId int64) (chapter, e
 	rsp, reqErr := client.Do(req)
 
 	if reqErr != nil {
-		log.SugarLogger.Errorf("[GetChapterInfo]NewRequest_error reqErr:%v", reqErr)
+		log.Errorf("[GetChapterInfo]NewRequest_error reqErr:%v", reqErr)
 		return chapterInfo, reqErr
 	}
 	defer rsp.Body.Close()
@@ -197,7 +197,7 @@ func (f DianZhong) GetChapterInfo(ctx context.Context, bookId int64) (chapter, e
 
 	err := sonic.Unmarshal(content, &chapterInfoRsp)
 	if err != nil {
-		log.SugarLogger.Errorf("[GetChapterInfo]Unmarshal_error err:%v", err)
+		log.Errorf("[GetChapterInfo]Unmarshal_error err:%v", err)
 		return chapterInfo, err
 	}
 	if len(chapterInfoRsp.Data.ChapterList) <= 0 {
@@ -222,7 +222,7 @@ func (f DianZhong) GetChapterContent(ctx context.Context, bookId, itemId int64) 
 	rsp, reqErr := client.Do(req)
 
 	if reqErr != nil {
-		log.SugarLogger.Errorf("[GetChapterContent]NewRequest_error reqErr:%v", reqErr)
+		log.Errorf("[GetChapterContent]NewRequest_error reqErr:%v", reqErr)
 		return "", reqErr
 	}
 	defer rsp.Body.Close()
@@ -231,7 +231,7 @@ func (f DianZhong) GetChapterContent(ctx context.Context, bookId, itemId int64) 
 
 	err := sonic.Unmarshal(content, &chapterInfoRsp)
 	if err != nil {
-		log.SugarLogger.Errorf("[GetChapterContent]Unmarshal_error err:%v", err)
+		log.Errorf("[GetChapterContent]Unmarshal_error err:%v", err)
 		return "", err
 	}
 
