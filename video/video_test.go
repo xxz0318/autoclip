@@ -69,11 +69,11 @@ func TestEditVideo(t *testing.T) {
 			args: args{
 				ctx:          context.Background(),
 				videoTime:    1200,
-				videoType:    "jieya/切沙子太空沙塑形/",
+				videoType:    "切沙子太空沙塑形/",
 				width:        1080,
 				length:       1920,
 				speed:        1,
-				fragDuration: 10,
+				fragDuration: 15,
 			},
 		},
 	}

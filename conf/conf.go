@@ -53,7 +53,14 @@ type audio struct {
 }
 
 func LoadConfig() {
-	buf, err := os.ReadFile("../conf/config.yaml")
+	confDir := os.Getenv("GO_WORKSPACE")
+	if confDir == "" {
+		confDir = "./"
+	} else {
+		confDir = confDir + "douyin_video/"
+	}
+
+	buf, err := os.ReadFile(confDir + "config.yaml")
 	if err != nil {
 		log.Panicln("load config conf failed: ", err)
 	}

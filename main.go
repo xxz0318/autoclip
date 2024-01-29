@@ -47,7 +47,7 @@ func txtToAudio(ctx context.Context, novelObj novel.Novel, bookId int64) {
 	// 去除所有尖括号内的HTML代码，并换成换行符
 	re, _ := regexp.Compile("\\<[\\S\\s]+?\\>")
 	txt = re.ReplaceAllString(txt, "\n")
-	log.Debugf("[txtToAudio]txtLength:%+v, txt:%s", len(txt), txt)
+	log.Warnf("[txtToAudio]bookId:%d, txtLength:%+v, txt:%s", bookId, len(txt), txt)
 	txtSlice := strings.Split(txt, "\n")
 	var (
 		length      int
@@ -88,6 +88,6 @@ func txtToAudio(ctx context.Context, novelObj novel.Novel, bookId int64) {
 			log.Errorf("[txtToAudio]audio生成失败 bookId:%d, k:%d, err:%v", bookId, k, err)
 			return
 		}
-		fmt.Printf("audio生成成功，fileName:%+v\n", fileName)
+		log.Infof("audio生成成功，fileName:%+v\n", fileName)
 	}
 }

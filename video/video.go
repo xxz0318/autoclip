@@ -22,7 +22,7 @@ import (
 func EditVideo(ctx context.Context, videoTime float64, videoType string, width, length int64, speed, fragDuration float64) error {
 	// 遍历目录中所有视频
 	videoFiles, _ := getDirAllVideo(conf.C.VideoResourceDir + videoType)
-	// 却输出目录及文件名
+	// 确定输出目录及文件名
 	outputDir := conf.C.VideoOutputDir + carbon.Now().ToShortDateString() + "/"
 	err := utils.MkdirIfNotExist(outputDir)
 	if err != nil {
@@ -31,25 +31,10 @@ func EditVideo(ctx context.Context, videoTime float64, videoType string, width, 
 	}
 	fileName := outputDir + carbon.Now().ToShortDateTimeString() + ".mp4"
 
-	firstIndex := getRandomInt(0, int64(len(videoFiles)))
-	firstVideo := videoFiles[firstIndex]
-	log.Debugf("[EditVideo]firstVideo:%s", firstVideo)
-	clip, err := moviego.Load(firstVideo)
-	if err != nil {
-		log.Errorf("[EditVideo]Load_error video:%s,err:%v", firstVideo, err)
-		return err
-	}
 	var addedVideo []int64
-	addedVideo = append(addedVideo, firstIndex)
-	if fragDuration != 0 {
-		clip = subClip(clip, fragDuration*speed)
-		addedVideo = append(addedVideo, firstIndex)
-	}
 	var videos []moviego.Video
 	var allDuration float64
-	videos = append(videos, clip)
-	allDuration += clip.Duration()
-	log.Debugf("[EditVideo]first clip.Duration():%v", clip.Duration())
+	var clip moviego.Video
 	for {
 		if allDuration >= videoTime {
 			break
@@ -64,7 +49,7 @@ func EditVideo(ctx context.Context, videoTime float64, videoType string, width, 
 			}
 		}
 		video := videoFiles[index]
-		log.Debugf("[EditVideo]next_video:%s", video)
+		log.Debugf("[EditVideo]video:%s", video)
 		// 随机取视频片段
 		clipTmp, err := moviego.Load(video)
 		if err != nil {
@@ -78,24 +63,16 @@ func EditVideo(ctx context.Context, videoTime float64, videoType string, width, 
 		addedVideo = append(addedVideo, index)
 		allDuration += clipTmp.Duration()
 		log.Debugf("[EditVideo]allDuration:%v, new clip.Duration:%v", allDuration, clipTmp.Duration())
-		// // 拼接视频
-		// log.Debugf("[EditVideo]all_before clip.Duration:%v, new clip.Duration:%v", clip.Duration(), clipTmp.Duration())
-		// clip, err = moviego.Concat([]moviego.Video{clip, clipTmp})
-		// if err == nil {
-		// 	addedVideo = append(addedVideo, index)
-		// }
-		// log.Debugf("[EditVideo]all_end clip.Duration:%v, new clip.Duration:%v", clip.Duration(), clipTmp.Duration())
+
 	}
 
 	// 拼接视频
-	clip, err = moviego.Concat(videos)
+	// clip, err = moviego.Concat(videos)
+	clip, err = moviego.ConcatFormTs(videos)
 	if err != nil {
 		log.Errorf("[EditVideo]Concat_error err:%v", err)
 	}
 	log.Debugf("[EditVideo]all clip.Duration:%v", clip.Duration())
-	if clip.Duration() > videoTime {
-		clip = clip.SubClip(0, videoTime)
-	}
 
 	err = clip.Resize(width, length).DelAudio().Output(fileName).Run()
 	if err != nil {

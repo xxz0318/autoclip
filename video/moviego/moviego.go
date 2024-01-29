@@ -250,6 +250,85 @@ func Concat(videos []Video) (Video, error) {
 	if err != nil {
 		return Video{}, err
 	}
+	defer func() {
+		for _, video := range videos {
+			os.Remove(video.filePath)
+		}
+	}()
+	defer os.Remove(concatStorage.Name())
+
+	loadedFinalVideo, finalLoadError := Load(finalFile.Name())
+
+	if finalLoadError != nil {
+		return loadedFinalVideo, finalErr
+	}
+
+	loadedFinalVideo.isTemp = true
+
+	return loadedFinalVideo, nil
+}
+
+func ConcatFormTs(videos []Video) (Video, error) {
+	var videoParts string
+	tempFolder := ""
+
+	concatStorage, _ := os.CreateTemp(tempFolder, "list-*.txt")
+
+	var lastExtension string
+	for num, video := range videos {
+
+		// ffmpeg -i 01.mp4 -c copy -vbsf h264_mp4toannexb 01.ts
+		newFilePath := strings.Replace(video.filePath, video.extension, "ts", -1)
+		err := ffmpeg.Input(video.filePath, ffmpeg.KwArgs{}).Output(
+			newFilePath, ffmpeg.KwArgs{"c": "copy", "vbsf": "h264_mp4toannexb"},
+		).OverWriteOutput().Run()
+		if err != nil {
+			return Video{}, err
+		}
+
+		lastExtension = video.extension
+
+		if !video.hasModified {
+			videoParts += fmt.Sprintf("file '%s'\n", newFilePath)
+		} else {
+			file, tempFileErr := os.CreateTemp(tempFolder, fmt.Sprintf("video-%d-*.ts", num))
+
+			if tempFileErr != nil {
+				return Video{}, tempFileErr
+			}
+
+			videoParts += fmt.Sprintf("file '%s'\n", file.Name())
+
+			video.Output(file.Name()).Run()
+			fmt.Println("Done:", file.Name())
+
+			defer os.Remove(file.Name())
+		}
+	}
+
+	_, writingError := concatStorage.WriteString(videoParts)
+	if writingError != nil {
+		return Video{}, writingError
+	}
+
+	finalFile, finalErr := os.CreateTemp(tempFolder, fmt.Sprintf("final-*.%s", lastExtension))
+	if finalErr != nil {
+		return Video{}, finalErr
+	}
+	err := ffmpeg.Input(concatStorage.Name(), ffmpeg.KwArgs{"f": "concat", "safe": "0"}).Output(
+		finalFile.Name(), ffmpeg.KwArgs{"c": "copy", "absf": "aac_adtstoasc"},
+	).OverWriteOutput().Run()
+
+	if err != nil {
+		return Video{}, err
+	}
+	defer func() {
+		for _, video := range videos {
+			newFilePath := strings.Replace(video.filePath, video.extension, "ts", -1)
+			os.Remove(newFilePath)
+			os.Remove(video.filePath)
+		}
+	}()
 
 	defer os.Remove(concatStorage.Name())
 
