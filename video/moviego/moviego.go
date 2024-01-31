@@ -3,11 +3,12 @@ package moviego
 import (
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 
+	"douyin_video/log"
 	"github.com/tidwall/gjson"
 	ffmpeg "github.com/u2takey/ffmpeg-go"
 )
@@ -129,7 +130,7 @@ func (V Video) prepareKwArgs(ignoreThisKeywords []string) ffmpeg.KwArgs {
 
 	compileKwArgs := make(ffmpeg.KwArgs)
 	for Keyword, Args := range V.ffmpegArgs {
-		if InArray(Keyword, ignoreThisKeywords) {
+		if slices.Contains(ignoreThisKeywords, Keyword) {
 			continue
 		}
 
@@ -407,7 +408,7 @@ func Load(fileName string) (Video, error) {
 	videoProbe, videoProbeError := ffmpeg.Probe(abs)
 
 	if videoProbeError != nil {
-		log.Printf("videoProbeError: %v", videoProbeError)
+		log.Errorf("videoProbeError: %v", videoProbeError)
 		panic(fmt.Errorf("fatal error: %w", videoProbeError))
 	}
 
@@ -424,12 +425,4 @@ func Load(fileName string) (Video, error) {
 		stream:    ffmpeg.Input(fileName),
 		extension: extension,
 	}, nil
-}
-func InArray[T Ordered](needle T, haystack []T) bool {
-	for _, val := range haystack {
-		if val == needle {
-			return true
-		}
-	}
-	return false
 }

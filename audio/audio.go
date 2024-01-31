@@ -40,7 +40,7 @@ func TxtToAudio(ctx context.Context, content, audioFileName string) error {
 	// ==================提交配音任务==================
 	taskParams := audioConvertReq{
 		Pitch:       "0",
-		Speed:       5,
+		Speed:       conf.C.Audio.Speed,
 		StyleDegree: 0,
 		Text:        content,
 		Voice:       conf.C.Audio.VoiceId,

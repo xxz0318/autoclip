@@ -12,6 +12,8 @@ audioOutputDir: /Users/xiexinzhong/workspace/audio/
 logDir: /Users/xiexinzhong/workspace/golang/douyin_video/logs/
 #小说来源
 novelSource: fanQie
+#生成内容类型， 1只生成音频，2只生成视频，3音频视频都生成
+contentType: 1
 
 # 小说配置信息
 #番茄小说配置
@@ -30,8 +32,6 @@ fanQie:
     "Referer": "https://promoter.fanqieopen.com/page/share/rank?token={token}&tab_type=1&key=1"
     "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
     "Cookie": "s_v_web_id=verify_lrstlx70_Q4gOD0jR_48A7_4sWX_87YP_Zu7PEA0aRUyG; ttcid=11ed2b5df619455095bcf131316580eb20; x-jupiter-uuid=1706163837292585; tt_scid=214zHnieMUuh4r34U5lJD2eznbrk09MmQHRrav2lwd8p3-I7o5toeoC49AVBTndFc4a8; msToken=8uXDyGW_xJYzJYLvt6jOkxbR3FfmWRU2o2sv22rr94YNytFNWSN89-XN16y5RwpkSLVbi1VQDDm1xGuIQaK1wyjYxpw08WkdpjZfYmCYgPFQgGKCQneSjVWLC44DLQ=="
-#    "Cookie": "s_v_web_id=verify_lrstlx70_Q4gOD0jR_48A7_4sWX_87YP_Zu7PEA0aRUyG; ttcid=11ed2b5df619455095bcf131316580eb20; x-jupiter-uuid=1706163837292585; tt_scid=lsQVMoixmFaemTM5vuOyFGgUlgkuNAw0EMWF4KgrFd4eA1rqkZZ94aGQKh1febPd14d3; msToken=FYqxpB9UUBiDsZkORUb-4iytD-w214OiwZc0Sf8v5DsmLWVLYKchCVU61MyHIUM5sVDWdM4lZfEuLYSczciDv3n7wTK8lQi_wWpHyQVV6jxI1Nfp1M2TZP1NNtWMww=="
-#           "Cookie":"s_v_web_id=verify_lrstlx70_Q4gOD0jR_48A7_4sWX_87YP_Zu7PEA0aRUyG; ttcid=11ed2b5df619455095bcf131316580eb20; x-jupiter-uuid=1706163837292585; msToken={msToken}; tt_scid=lsQVMoixmFaemTM5vuOyFGgUlgkuNAw0EMWF4KgrFd4eA1rqkZZ94aGQKh1febPd14d3"}
   cbidList:
 #    - 7327542584295820350
 #    - 7324600484960944702
@@ -40,9 +40,9 @@ fanQie:
 #    - 7326809253237228094
 #    - 7324639900605628990
 #    - 7324991757513409086
-    - 7324174828691259966
-    - 7323927973575281726
-    - 7324948310333066302
+#    - 7321598679939288115
+    - 7271510621655403561
+#    - 7326809253237228094
 
 
 #音频转换配置
@@ -55,6 +55,7 @@ audio:
   convertUrl: https://www.douge.club/peiyin/user/webNewSynGenerateVoiceNew
   getVoiceAudioUrlWeb: https://www.douge.club/peiyin/user/getVoiceAudioUrlWeb
   voiceId: 52
+  speed: 10 #朗读速率:0.5：3， 正常是5，1.1:6，1.15:15
   sign: 31b98eb872bd3156fc8114176dfb8ff571c81bf6c3c929b30041a4a459ae75bf5cccd8d04f16da7586d7203b2179859e86772b44bffa9e76bdb25b938485156d
   header:
     "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
@@ -63,3 +64,46 @@ audio:
     "Cookie": "shareToken=8228218521937925"
     "Accept": "application/json, text/plain, */*"
     "Referer": "https://www.douge.club/"
+
+#视频生成配置
+video:
+  videoNum: 1        #生成视频数量
+  videoTime: 2000     #生成新视频总时长
+  videoType: "切沙子太空沙塑形/"  #视频原素材目录
+  videoWidth: 1080   #视频宽度
+  videoHeight: 1920  #视频高度
+  speed: 1           #视频速度，目前只支持1
+  fragDuration: 15   #素材视频单片段剪辑时长
+
+youbao:
+  isAddKeyword: false
+  contentType: "fanqieduanpian"
+  loginUrl: https://newapi.thed1g.com/api/login/account
+  userInfoUrl: https://newapi.thed1g.com/api/user/info
+  initSelectUrl: https://newapi.thed1g.com/v2api/keywordV5/initSelectData
+  getFiledUrl: https://newapi.thed1g.com/v2api/KeywordV5/initFormFiled
+  addKeywordUrl: https://newapi.thed1g.com/v2api/KeywordV5/add
+  header:
+    "Schoolo": "d01cdb015332f142e0e6e510e8855f89"
+    "Token": "91d158aff06e9b1a6e1ff3c5a86aa247"
+    "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1"
+    "Referer": "https://youbao.thed1g.com/"
+    "Content-Type": "application/json"
+  keywords:
+    7321598679939288115:
+      bookName: "我死后，成了他的大体老师"
+      authorName: "长安见月"
+      keyword:
+#        - "为了复仇我做了个交易"
+    7271510621655403561:
+      bookName: "七年时分"
+      authorName: "椰椰"
+      keyword:
+#        - "女秘书的手段"
+#        - "客房里的女秘书"
+    7326809253237228094:
+      bookName: "穿越女是文抄公"
+      authorName: "梨云渐"
+      keyword:
+#        - "女主是我的表姐"
+#        - "古色古香的女主"

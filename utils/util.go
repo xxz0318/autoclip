@@ -4,7 +4,18 @@
 // @description:
 package utils
 
-import "os"
+import (
+	"bytes"
+	"context"
+	"fmt"
+	"io"
+	"net/http"
+	"os"
+	"time"
+
+	"douyin_video/log"
+	"github.com/bytedance/sonic"
+)
 
 // MkdirIfNotExist makes directories if the input path is not exists
 func MkdirIfNotExist(dir string) error {
@@ -17,4 +28,42 @@ func MkdirIfNotExist(dir string) error {
 	}
 
 	return nil
+}
+
+func Request(ctx context.Context, url, method string, body interface{}, header map[string]string, rspStruct any) (string, error) {
+	client := &http.Client{
+		Timeout: time.Second * 3,
+	}
+	var req *http.Request
+	if method == "POST" {
+		bodyByte, _ := sonic.Marshal(&body)
+		req, _ = http.NewRequestWithContext(ctx, method, url, bytes.NewReader(bodyByte))
+	} else {
+		req, _ = http.NewRequestWithContext(ctx, method, url, nil)
+	}
+	if len(header) > 0 {
+		for k, v := range header {
+			req.Header.Set(k, v)
+		}
+	}
+	rsp, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer rsp.Body.Close()
+	if rsp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("request rsp.StatusCode:%d", rsp.StatusCode)
+	}
+	rspBody, err := io.ReadAll(rsp.Body)
+	if err != nil {
+		return "", err
+	}
+	if rspStruct != nil {
+		err = sonic.Unmarshal(rspBody, rspStruct)
+		if err != nil {
+			log.Errorf("[Request]Unmarshal_error err:%v", err)
+			return "", err
+		}
+	}
+	return string(rspBody), nil
 }

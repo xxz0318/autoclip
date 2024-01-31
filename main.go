@@ -15,7 +15,9 @@ import (
 	"douyin_video/log"
 	"douyin_video/novel"
 	"douyin_video/utils"
-	"github.com/golang-module/carbon/v2"
+	"douyin_video/video"
+	"douyin_video/youbao"
+	"golang.org/x/sync/errgroup"
 )
 
 func main() {
@@ -24,30 +26,67 @@ func main() {
 	log.InitLog()
 
 	ctx := context.Background()
-	var novelObj novel.Novel
-	var bookIds []int64
-	if conf.C.NovelSource == "fanQie" {
-		novelObj = novel.FanQie{}
-		bookIds = conf.C.FanQie.CbidList
-	} else if conf.C.NovelSource == "dianZhong" {
-		novelObj = novel.DianZhong{}
-	}
-	for _, v := range bookIds {
-		txtToAudio(ctx, novelObj, v)
-	}
+	group, _ := errgroup.WithContext(ctx)
+	if conf.C.ContentType == 1 || conf.C.ContentType == 3 {
+		var novelObj novel.Novel
+		var bookIds []int64
+		if conf.C.NovelSource == "fanQie" {
+			novelObj = novel.FanQie{}
+			bookIds = conf.C.FanQie.CbidList
+		} else if conf.C.NovelSource == "dianZhong" {
+			novelObj = novel.DianZhong{}
+		}
+		group.Go(func() error {
+			var err error
+			for _, v := range bookIds {
+				bookId := v
+				err = txtToAudio(ctx, novelObj, bookId)
+				if err != nil {
+					break
+				}
+			}
+			return err
+		})
 
+	}
+	if conf.C.ContentType == 2 || conf.C.ContentType == 3 {
+		for i := 0; i < conf.C.Video.VideoNum; i++ {
+			group.Go(func() error {
+				err := video.EditVideo(ctx, conf.C.Video.VideoTime,
+					conf.C.Video.VideoType, conf.C.Video.VideoWidth,
+					conf.C.Video.VideoHeight, conf.C.Video.Speed,
+					conf.C.Video.FragDuration)
+				return err
+			})
+		}
+	}
+	if conf.C.YouBao.IsAddKeyword {
+		for bookId, v := range conf.C.YouBao.Keywords {
+			v := v
+			if len(v.KeyWord) < 1 {
+				continue
+			}
+			bookId := bookId
+			group.Go(func() error {
+				err := youbao.ApplyFanQieKeyword(ctx, bookId, v.AuthorName, v.BookName, v.KeyWord)
+				return err
+			})
+		}
+	}
+	if err := group.Wait(); err != nil {
+		fmt.Println(err)
+	}
 }
 
-func txtToAudio(ctx context.Context, novelObj novel.Novel, bookId int64) {
+func txtToAudio(ctx context.Context, novelObj novel.Novel, bookId int64) error {
 	txt, err := novelObj.GetChapterContentByBookId(ctx, bookId)
 	if err != nil {
-		log.Errorf("[txtToAudio]GetChapterContentByBookId_error bookId:%d, err:%v", bookId, err)
-		return
+		log.Errorf("[txtToAudio]GetContent_error bookId:%d, err:%v", bookId, err)
+		return err
 	}
 	// 去除所有尖括号内的HTML代码，并换成换行符
 	re, _ := regexp.Compile("\\<[\\S\\s]+?\\>")
 	txt = re.ReplaceAllString(txt, "\n")
-	log.Warnf("[txtToAudio]bookId:%d, txtLength:%+v, txt:%s", bookId, len(txt), txt)
 	txtSlice := strings.Split(txt, "\n")
 	var (
 		length      int
@@ -59,7 +98,6 @@ func txtToAudio(ctx context.Context, novelObj novel.Novel, bookId int64) {
 		length += len(txtSlice[k])
 
 		if length >= conf.C.Audio.TxtLength {
-
 			newTxtSlice = append(newTxtSlice, txtTmp)
 			txtTmp = txtSlice[k]
 			length = 0
@@ -70,24 +108,24 @@ func txtToAudio(ctx context.Context, novelObj novel.Novel, bookId int64) {
 		}
 	}
 	log.Debugf("[txtToAudio]newtxtLength:%+v", len(newTxtSlice))
-	outputDir := conf.C.AudioOutputDir + carbon.Now().Format("Ymd") + "/%d/"
+	outputDir := conf.C.AudioOutputDir + "/%d/"
 	outputDir = fmt.Sprintf(outputDir, bookId)
 	err = utils.MkdirIfNotExist(outputDir)
 	if err != nil {
 		log.Errorf("[txtToAudio]mkdirIfNotExist_error bookId:%d, err:%v", bookId, err)
-		return
+		return err
 	}
 	for k, v := range newTxtSlice {
 
-		log.Debugf("[txtToAudio]newTxtSlice======== K:%d, V:%s", k, v)
+		log.Debugf("[txtToAudio]newTxtSlice======== bookId:%d, k:%d, v:%s", bookId, k, v)
 
 		fileName := fmt.Sprintf("%d_%d", bookId, k+1)
-
 		err = audio.TxtToAudio(ctx, v, outputDir+fileName)
 		if err != nil {
 			log.Errorf("[txtToAudio]audio生成失败 bookId:%d, k:%d, err:%v", bookId, k, err)
-			return
+			return fmt.Errorf("[txtToAudio]audio生成失败 bookId:%d, k:%d, err:%v", bookId, k, err)
 		}
-		log.Infof("audio生成成功，fileName:%+v\n", fileName)
+		log.Infof("audio生成成功，bookId:%d, fileName:%+v\n", bookId, fileName)
 	}
+	return nil
 }

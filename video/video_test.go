@@ -60,9 +60,10 @@ func TestEditVideo(t *testing.T) {
 		fragDuration float64
 	}
 	tests := []struct {
-		name    string
-		args    args
-		wantErr bool
+		name     string
+		args     args
+		wantErr  bool
+		videoNum int
 	}{
 		{
 			name: "",
@@ -75,12 +76,15 @@ func TestEditVideo(t *testing.T) {
 				speed:        1,
 				fragDuration: 15,
 			},
+			videoNum: 10,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := EditVideo(tt.args.ctx, tt.args.videoTime, tt.args.videoType, tt.args.width, tt.args.length, tt.args.speed, tt.args.fragDuration); (err != nil) != tt.wantErr {
-				t.Errorf("EditVideo() error = %v, wantErr %v", err, tt.wantErr)
+			for i := 0; i < tt.videoNum; i++ {
+				if err := EditVideo(tt.args.ctx, tt.args.videoTime, tt.args.videoType, tt.args.width, tt.args.length, tt.args.speed, tt.args.fragDuration); (err != nil) != tt.wantErr {
+					t.Errorf("EditVideo() error = %v, wantErr %v", err, tt.wantErr)
+				}
 			}
 		})
 	}

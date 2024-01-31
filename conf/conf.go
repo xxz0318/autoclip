@@ -27,8 +27,11 @@ type config struct {
 	AudioOutputDir   string `yaml:"audioOutputDir"`
 	LogDir           string `yaml:"logDir"`
 	NovelSource      string `yaml:"novelSource"`
+	ContentType      int32  `yaml:"contentType"`
 	FanQie           fanQie `yaml:"fanQie"`
 	Audio            audio  `yaml:"audio"`
+	Video            video  `yaml:"video"`
+	YouBao           youbao `yaml:"youbao"`
 }
 type fanQie struct {
 	Token             string            `yaml:"token"`
@@ -43,6 +46,7 @@ type fanQie struct {
 	CbidList          []int64           `yaml:"cbidList"`
 }
 type audio struct {
+	Speed               int32             `yaml:"speed"`
 	AesKey              string            `yaml:"aesKey"`
 	TxtLength           int               `yaml:"txtLength"`
 	VoiceId             string            `yaml:"voiceId"`
@@ -50,6 +54,31 @@ type audio struct {
 	GetVoiceAudioUrlWeb string            `yaml:"getVoiceAudioUrlWeb"`
 	Sign                string            `yaml:"sign"`
 	Header              map[string]string `yaml:"header"`
+}
+type video struct {
+	VideoNum     int     `yaml:"videoNum"`
+	VideoTime    float64 `yaml:"videoTime"`
+	VideoType    string  `yaml:"videoType"`
+	VideoWidth   int64   `yaml:"videoWidth"`
+	VideoHeight  int64   `yaml:"videoHeight"`
+	Speed        float64 `yaml:"speed"`
+	FragDuration float64 `yaml:"fragDuration"`
+}
+type youbao struct {
+	IsAddKeyword  bool                `yaml:"isAddKeyword"`
+	ContentType   string              `yaml:"contentType"`
+	LoginUrl      string              `yaml:"loginUrl"`
+	UserInfoUrl   string              `yaml:"userInfoUrl"`
+	InitSelectUrl string              `yaml:"initSelectUrl"`
+	GetFiledUrl   string              `yaml:"getFiledUrl"`
+	AddKeywordUrl string              `yaml:"addKeywordUrl"`
+	Header        map[string]string   `yaml:"header"`
+	Keywords      map[int64]ybKeyword `yaml:"keywords"`
+}
+type ybKeyword struct {
+	AuthorName string   `yaml:"authorName"`
+	BookName   string   `yaml:"bookName"`
+	KeyWord    []string `yaml:"keyword"`
 }
 
 func LoadConfig() {

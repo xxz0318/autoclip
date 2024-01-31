@@ -48,6 +48,12 @@ func Error(args ...interface{}) {
 func Errorf(format string, args ...interface{}) {
 	SugarLogger.Errorf(format, args...)
 }
+func Fatal(args ...interface{}) {
+	SugarLogger.Fatal(args...)
+}
+func Fatalf(format string, args ...interface{}) {
+	SugarLogger.Fatalf(format, args...)
+}
 
 // InitLog 初始化日志
 

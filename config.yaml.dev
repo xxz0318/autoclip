@@ -49,3 +49,13 @@ audio:
     "Cookie": "shareToken=xxxx"
     "Accept": "application/json, text/plain, */*"
     "Referer": "https://www.douge.club/"
+
+#视频生成配置
+video:
+  videoNum: 1,        #生成视频数量
+  videoTime: 2000     #生成新视频总时长
+  videoType: "xxxx/",  #视频原素材目录
+  videoWidth: 1080,   #视频宽度
+  videoHeight: 1920,  #视频高度
+  speed: 1,           #视频速度，目前只支持1
+  fragDuration: 15,   #素材视频单片段剪辑时长
