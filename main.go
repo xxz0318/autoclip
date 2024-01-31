@@ -51,13 +51,13 @@ func main() {
 	}
 	if conf.C.ContentType == 2 || conf.C.ContentType == 3 {
 		for i := 0; i < conf.C.Video.VideoNum; i++ {
-			group.Go(func() error {
-				err := video.EditVideo(ctx, conf.C.Video.VideoTime,
-					conf.C.Video.VideoType, conf.C.Video.VideoWidth,
-					conf.C.Video.VideoHeight, conf.C.Video.Speed,
-					conf.C.Video.FragDuration)
-				return err
-			})
+			err := video.EditVideo(ctx, conf.C.Video.VideoTime,
+				conf.C.Video.VideoType, conf.C.Video.VideoWidth,
+				conf.C.Video.VideoHeight, conf.C.Video.Speed,
+				conf.C.Video.FragDuration)
+			if err != nil {
+				break
+			}
 		}
 	}
 	if conf.C.YouBao.IsAddKeyword {
